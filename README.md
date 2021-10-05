@@ -1,6 +1,6 @@
 # Flowchart app
 
-Demo app: flowchart-app.herokuapp.com/
+Demo app: http://flowchart-app.herokuapp.com/
 
 Site for translating C++-like code to flowcharts. Have an opportunity to create if, loop and one-line expressions using if, else, for, while constructions.
 
