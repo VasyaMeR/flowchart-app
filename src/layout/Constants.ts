@@ -1,0 +1,9 @@
+export const ARROW_LEN = 12;
+export const PADDING_V = 3;
+export const PADDING_H = 6;
+export const PADDING_BETWEEN_H = 5;
+export const PADDING_BETWEEN_V = ARROW_LEN;
+export const IF_ARROW_PADDING = 6;
+export const TRUE_LABEL = "True";
+export const FALSE_LABEL = "False";
+export const LOOP_ARROW_PADDING = 10;
