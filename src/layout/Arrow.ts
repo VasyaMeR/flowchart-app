@@ -23,7 +23,6 @@ class ArrowComponent extends Layout {
       this.height = this.nodeHeight;
       return;
     }
-    console.log("Max ", this.nodeWidth, this.children.width);
     this.width = Math.max(this.nodeWidth, this.children.width);
     this.height = this.nodeHeight + this.children.height;
   }

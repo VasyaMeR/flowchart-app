@@ -43,7 +43,7 @@ class IfNodeComponent extends NodeComponent {
       this.falseLayout ? this.falseLayout.width : 0,
       nodeWidth
     );
-    console.log(this.trueLayout, this.falseLayout, nodeWidth);
+    // console.log(this.trueLayout, this.falseLayout, nodeWidth);
 
     drawText(
       doc,
@@ -67,9 +67,9 @@ class IfNodeComponent extends NodeComponent {
       this.node.label!
     );
 
-    console.log("X: ", x + this.nodeWidth / 2 + nodeWidth / 2);
-    console.log("Y: ", y + nodeHeight / 2);
-    console.log("X@ ", x, this.nodeWidth, columnWidth, IF_ARROW_PADDING);
+    // console.log("X: ", x + this.nodeWidth / 2 + nodeWidth / 2);
+    // console.log("Y: ", y + nodeHeight / 2);
+    // console.log("X@ ", x, this.nodeWidth, columnWidth, IF_ARROW_PADDING);
     drawLine(
       doc,
       x + this.nodeWidth / 2 + nodeWidth / 2,
@@ -135,19 +135,33 @@ class IfNodeComponent extends NodeComponent {
     this.falseLayout = generateLayoutFromFlow(this.node.falseNode!);
     this.falseLayout.evaluate(doc);
 
+    if (!this.children) {
+      this.width = Math.max(
+        this.trueLayout.width +
+          this.falseLayout.width +
+          this.nodeWidth / 2 +
+          2 * IF_ARROW_PADDING
+      );
+      this.height =
+        this.nodeHeight +
+        PADDING_BETWEEN_V +
+        Math.max(this.trueLayout.height, this.falseLayout.height);
+      return;
+    }
+
     this.children?.evaluate(doc);
     this.width = Math.max(
       this.trueLayout.width +
         this.falseLayout.width +
         this.nodeWidth / 2 +
         2 * IF_ARROW_PADDING,
-      <number>this.children?.width
+      this.children.width
     );
     this.height =
       this.nodeHeight +
       PADDING_BETWEEN_V +
       Math.max(this.trueLayout.height, this.falseLayout.height) +
-      <number>this.children?.height;
+      this.children.height;
   }
 }
 
