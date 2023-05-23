@@ -8,175 +8,208 @@ import {
   OperationNode,
   OutputNode,
 } from "./FlowDataTypes";
+import StringView from "./StringView";
 
-function isPrefix(st: string, prefix: string) {
-  if (st.length < prefix.length) return false;
-  for (let i = 0; i < prefix.length; i++) {
-    if (st[i] !== prefix[i]) return false;
-  }
-  return true;
-}
+function getBlock(code: StringView, open: string, close: string): StringView {
+  code.removePrefixWhitespaces();
+  code.removePrefix(open.length);
 
-function getBlock(code: string, open: string, close: string) {
-  code = code.replace(open, "");
-  let block: string = "";
+  let block: string[] = [];
   let cnt = 1;
-  while (code.length > 0) {
-    let c: string = code[0];
-    code = code.replace(c, "");
-    block += c;
+  
+  while (code.length() > 0) {
+    let c: string = code.front();
+    code.removePrefix(1);
+  
+    block.push(c);
     if (c === open) cnt++;
     else if (c === close) cnt--;
     if (cnt === 0) break;
+  
     if (cnt < 0) {
       throw Error();
     }
   }
-  block = block.slice(0, -1);
-  return [code, block];
+  block.pop();
+  return new StringView(block.join(""));
 }
 
-function getShortBlock(code: string) {
-  let block = "";
-  while (code.length > 0 && code[0] !== ";") {
-    let c: string = code[0];
-    code = code.replace(c, "");
-    block += c;
+function getShortBlock(code: StringView): StringView {
+  let block: string[] = [];
+
+  while (code.length() > 0 && code.front() !== ";") {
+    block.push(code.front());
+    code.removePrefix(1);
   }
-  code = code.replace(code[0], "");
-  return [code, block];
+
+  code.removePrefix(1);
+  return new StringView(block.join(""));
 }
 
-function getSplitedBlock(code: string, symbol: string) {
-  var block: string = "";
-  while (code.length > 0 && code[0] !== ";") {
-    if (isPrefix(code, symbol)) code = code.replace(symbol, ",");
+function getSplitedBlock(code: StringView, separator: string) {
+  var block: string[] = [];
+  while (code.length() > 0 && code.front() !== ";") {
+    if (code.isPrefix(separator)) {
+      block.push(",");
+      code.removePrefix(separator.length);
+    }
     else {
-      var c = code[0];
-      block += c;
-      code = code.replace(c, "");
+      block.push(code.front());
+      code.removePrefix(1);
     }
   }
-  while (block.length && block[0] === " ") {
-    block = block.replace(" ", "");
+  if (code.length() > 0)
+    code.removePrefix(1);
+
+  let str = block.join("");
+  while (str.length && str[0] === " ") {
+    str = str.replace(" ", "");
   }
-  while (block.length && block[0] === ",") {
-    block = block.replace(",", "");
+  while (str.length && str[0] === ",") {
+    str = str.replace(",", "");
   }
-  while (block.length && block[0] === " ") {
-    block = block.replace(" ", "");
+  while (str.length && str[0] === " ") {
+    str = str.replace(" ", "");
   }
-  return [code, block];
+  return str;
 }
 
-function removePrefix(st: string, c: string): string {
-  while (st.length > 0 && st[0] !== c) {
-    let c = st[0];
-    st = st.replace(c, "");
-  }
-  return st;
-}
+const IF = "if";
+const ELSE = "else";
+const WHILE = "while";
+const FOR = "for";
+const INPUT = "cin";
+const OUTPUT = "cout";
 
-function removePrefixWhitespaces(st: string): string {
-  while ((st.length > 0 && st.search(/\s/) === 0) || st[0] === ";") {
-    let c = st[0];
-    st = st.replace(c, "");
-  }
-  return st;
-}
+const Parse = (code: StringView, endNode: Node | null): Node | null => {
+  code.removePrefixWhitespaces();
 
-const Parse = (code: string, endNode: Node | null): Node | null => {
-  // console.log(`parse ${code}`);
-  code = removePrefixWhitespaces(code);
+  if (code.isPrefix(IF))
+    return ParseIf(code, endNode);
 
-  if (isPrefix(code, "if")) {
-    code = code.replace("if", "");
-    code = removePrefix(code, "(");
-    let condition = "";
-    [code, condition] = getBlock(code, "(", ")");
-    code = removePrefixWhitespaces(code);
-    let trueBody: string = "";
-    if (code.length > 0 && code[0] !== "{") {
-      [code, trueBody] = getShortBlock(code);
-    } else {
-      [code, trueBody] = getBlock(code, "{", "}");
-    }
-    let trueNode = Parse(trueBody, null);
-    let falseNode = null;
-    code = removePrefixWhitespaces(code);
-    if (isPrefix(code, "else")) {
-      code = code.replace("else", "");
-      code = removePrefixWhitespaces(code);
-      var falseBody: string = "";
-      if (code.length > 0 && code[0] !== "{") {
-        [code, falseBody] = getShortBlock(code);
-      } else {
-        [code, falseBody] = getBlock(code, "{", "}");
-      }
-      falseNode = Parse(falseBody, null);
-    }
-    return new IfConditionNode(
-      condition,
-      trueNode,
-      falseNode,
-      Parse(code, endNode)
-    );
-  } else if (isPrefix(code, "while")) {
-    code = code.replace("while", "");
-    code = removePrefix(code, "(");
-    let condition = "";
-    [code, condition] = getBlock(code, "(", ")");
-    code = removePrefixWhitespaces(code);
-    let trueBody: string = "";
-    if (code.length > 0 && code[0] !== "{") {
-      [code, trueBody] = getShortBlock(code);
-    } else {
-      [code, trueBody] = getBlock(code, "{", "}");
-    }
-    let trueNode = Parse(trueBody, null);
-    code = removePrefixWhitespaces(code);
-    return new LoopNode(condition, trueNode, Parse(code, endNode));
-  } else if (isPrefix(code, "for")) {
-    code = code.replace("for", "");
-    code = removePrefix(code, "(");
-    let conditions = "";
-    [code, conditions] = getBlock(code, "(", ")");
-    // console.log(conditions);
-    code = removePrefixWhitespaces(code);
-    let trueBody: string = "";
-    if (code.length > 0 && code[0] !== "{") {
-      [code, trueBody] = getShortBlock(code);
-    } else {
-      [code, trueBody] = getBlock(code, "{", "}");
-    }
-    let cond = conditions.split(";");
-    let trueNode = Parse(trueBody, Parse(cond[2], null));
-    code = removePrefixWhitespaces(code);
-    return new OperationNode(
-      cond[0],
-      new LoopNode(cond[1], trueNode, Parse(code, endNode))
-    );
-  } else if (isPrefix(code, "cin")) {
-    code = code.replace("cin", "");
-    let input = "";
-    [code, input] = getSplitedBlock(code, ">>");
-    return new InputNode(input, Parse(code, endNode));
-  } else if (isPrefix(code, "cout")) {
-    code = code.replace("cout", "");
-    let output = "";
-    [code, output] = getSplitedBlock(code, "<<");
-    return new OutputNode(output, Parse(code, endNode));
-  } else if (code.length > 0) {
-    let operation = "";
-    [code, operation] = getShortBlock(code);
-    return new OperationNode(operation, Parse(code, endNode));
-  }
+  if (code.isPrefix(WHILE))
+    return ParseWhile(code, endNode);
+  
+  if (code.isPrefix(FOR))
+    return ParseFor(code, endNode);
+  
+  if (code.isPrefix(INPUT))
+    return ParseInput(code, endNode);
+  
+  if (code.isPrefix(OUTPUT))
+    return ParseOutput(code, endNode);
+
+  if (code.length() > 0)
+    return ParseOperation(code, endNode);
 
   return endNode;
 };
 
+const ParseIf = (code: StringView, endNode: Node | null): Node | null => {
+  code.removePrefix(IF.length);
+  code.removePrefixWhitespaces();
+  code.removePrefix("(".length);
+
+  let condition = getBlock(code, "(", ")");
+  code.removePrefixWhitespaces();
+
+  let trueBody: StringView;
+  if (code.length() > 0 && code.front() !== "{") {
+    trueBody = getShortBlock(code);
+  } else {
+    trueBody = getBlock(code, "{", "}");
+  }
+  let trueNode = Parse(trueBody, null);
+
+  let falseNode = null;
+  code.removePrefixWhitespaces();
+  if (code.isPrefix(ELSE)) {
+    code.removePrefix(ELSE.length);
+    code.removePrefixWhitespaces();
+    
+    let falseBody: StringView;
+    if (code.length() > 0 && code.front() !== "{") {
+      falseBody = getShortBlock(code);
+    } else {
+      falseBody = getBlock(code, "{", "}");
+    }
+    falseNode = Parse(falseBody, null);
+  }
+
+  return new IfConditionNode(
+    condition.getString(),
+    trueNode,
+    falseNode,
+    Parse(code, endNode)
+  );
+}
+
+const ParseWhile = (code: StringView, endNode: Node | null): Node | null => {
+  code.removePrefix(WHILE.length);
+  code.removePrefixWhitespaces();
+  
+  let condition = getBlock(code, "(", ")");
+  code.removePrefixWhitespaces();
+
+  let trueBody: StringView;
+  if (code.length() > 0 && code.front() !== "{") {
+    trueBody = getShortBlock(code);
+  } else {
+    trueBody = getBlock(code, "{", "}");
+  }
+
+  let trueNode = Parse(trueBody, null);
+  code.removePrefixWhitespaces();
+  return new LoopNode(condition.getString(), trueNode, Parse(code, endNode));
+}
+
+const ParseFor = (code: StringView, endNode: Node | null): Node | null => {
+  code.removePrefix(FOR.length);
+  code.removePrefixWhitespaces();
+  
+  let conditions = getBlock(code, "(", ")");
+  code.removePrefixWhitespaces();
+
+  let trueBody: StringView;
+  if (code.length() > 0 && code.front() !== "{") {
+    trueBody = getShortBlock(code);
+  } else {
+    trueBody = getBlock(code, "{", "}");
+  }
+  let cond = conditions.getString().split(";");
+  let trueNode = Parse(trueBody, Parse(new StringView(cond[2]), null));
+  code.removePrefixWhitespaces();
+  
+  return new OperationNode(
+    cond[0],
+    new LoopNode(cond[1], trueNode, Parse(code, endNode))
+  );
+}
+
+const ParseInput = (code: StringView, endNode: Node | null): Node | null => {
+  code.removePrefix(INPUT.length);
+  let input = getSplitedBlock(code, ">>");
+  console.log("input");
+  console.log(input);
+  console.log(code.getString());
+  return new InputNode(input, Parse(code, endNode));
+}
+
+const ParseOutput = (code: StringView, endNode: Node | null): Node | null => {
+  code.removePrefix(OUTPUT.length);
+  let output = getSplitedBlock(code, "<<");
+  return new OutputNode(output, Parse(code, endNode));
+}
+
+const ParseOperation = (code: StringView, endNode: Node | null): Node | null => {
+  let operation = getShortBlock(code);
+  return new OperationNode(operation.getString(), Parse(code, endNode));
+}
+
 const ParseCppCode = (code: string) => {
-  var body = Parse(code, new EndNode());
+  let code_ = new StringView(code);
+
+  let body = Parse(code_, new EndNode());
   if (!body) {
     throw Error();
   }
