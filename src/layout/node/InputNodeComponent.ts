@@ -4,7 +4,6 @@ import jsPDF from "jspdf";
 import { PADDING_H, PADDING_V } from "../Constants";
 import drawParallelogram from "../../draw-helpers/Parallelogram";
 import drawText from "../../draw-helpers/Text";
-import { realpathSync } from "fs";
 
 class InputNodeComponent extends NodeComponent {
   public node: InputNode;
@@ -41,8 +40,8 @@ class InputNodeComponent extends NodeComponent {
 
     this.children?.evaluate(doc);
 
-    this.width = Math.max(this.nodeWidth, <number>this.children?.width);
-    this.height = this.nodeHeight + <number>this.children?.height;
+    this.width = Math.max(this.nodeWidth, this.children?.width as number);
+    this.height = this.nodeHeight + (this.children?.height as number);
   }
 }
 

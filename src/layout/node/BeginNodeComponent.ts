@@ -1,5 +1,5 @@
 import NodeComponent from "../Node";
-import { BeginNode, InputNode } from "../../parsers/FlowDataTypes";
+import { BeginNode } from "../../parsers/FlowDataTypes";
 import jsPDF from "jspdf";
 import { PADDING_H, PADDING_V } from "../Constants";
 import drawText from "../../draw-helpers/Text";

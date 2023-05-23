@@ -38,7 +38,7 @@ class OperationNodeComponent extends NodeComponent {
     this.nodeHeight = textDimensions.h + PADDING_V * 2;
 
     this.children?.evaluate(doc);
-    // console.log(this.children);
+
     if (this.children == null) {
       this.width = this.nodeWidth;
       this.height = this.nodeHeight;
@@ -47,7 +47,6 @@ class OperationNodeComponent extends NodeComponent {
 
     this.width = Math.max(this.nodeWidth, this.children.width);
     this.height = this.nodeHeight + this.children.height;
-    // console.log("Object", this);
   }
 }
 

@@ -41,8 +41,8 @@ function getShortBlock(code: StringView): StringView {
     block.push(code.front());
     code.removePrefix(1);
   }
-
-  code.removePrefix(1);
+  if (code.length() > 0)
+    code.removePrefix(1);
   return new StringView(block.join(""));
 }
 
@@ -189,15 +189,14 @@ const ParseFor = (code: StringView, endNode: Node | null): Node | null => {
 const ParseInput = (code: StringView, endNode: Node | null): Node | null => {
   code.removePrefix(INPUT.length);
   let input = getSplitedBlock(code, ">>");
-  console.log("input");
-  console.log(input);
-  console.log(code.getString());
+
   return new InputNode(input, Parse(code, endNode));
 }
 
 const ParseOutput = (code: StringView, endNode: Node | null): Node | null => {
   code.removePrefix(OUTPUT.length);
   let output = getSplitedBlock(code, "<<");
+
   return new OutputNode(output, Parse(code, endNode));
 }
 

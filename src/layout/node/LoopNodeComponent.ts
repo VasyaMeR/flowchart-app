@@ -4,7 +4,6 @@ import NodeComponent from "../Node";
 import jsPDF from "jspdf";
 import drawRhombus, { calcRhombus } from "../../draw-helpers/Rhombus";
 import {
-  ARROW_LEN,
   FALSE_LABEL,
   IF_ARROW_PADDING,
   LOOP_ARROW_PADDING,
@@ -113,13 +112,10 @@ class LoopNodeComponent extends NodeComponent {
       trueY
     );
 
-    // console.log("trueY ", trueY);
-
     if (!this.children) {
       return [trueX, trueY];
     }
-    // @ts-ignore
-    // console.log(this.children.arrowHeight);
+    
     return this.children.draw(doc, trueX, trueY);
   }
 
@@ -134,13 +130,13 @@ class LoopNodeComponent extends NodeComponent {
 
     this.width = Math.max(
       Math.max(this.trueLayout.width, this.nodeWidth) + 2 * IF_ARROW_PADDING,
-      <number>this.children?.width
+      this.children?.width as number
     );
     this.height =
       this.nodeHeight +
       2 * PADDING_BETWEEN_V +
       this.trueLayout.height +
-      <number>this.children?.width;
+      (this.children?.width as number);
   }
 }
 

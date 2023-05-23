@@ -41,9 +41,7 @@ export const generateLayoutFromFlow = (root: any) => {
     default:
       throw Error("Bad root");
   }
-  // console.log("Child: ", layout.children);
-  // console.log("Child: ", layout.children.children);
-  // console.log("Next: ", root.next);
+  
   if (root.next) layout.children.children = generateLayoutFromFlow(root.next);
   return layout;
 };

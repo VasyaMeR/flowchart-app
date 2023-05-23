@@ -5,14 +5,12 @@ import { IfConditionNode } from "../../parsers/FlowDataTypes";
 import Layout from "../Layout";
 import drawText from "../../draw-helpers/Text";
 import {
-  ARROW_LEN,
   FALSE_LABEL,
   IF_ARROW_PADDING,
   PADDING_BETWEEN_V,
   TRUE_LABEL,
 } from "../Constants";
 import drawLine from "../../draw-helpers/Line";
-import drawArrow from "../../draw-helpers/Arrow";
 import { generateLayoutFromFlow } from "../GenerateLayoutFromFlow";
 
 class IfNodeComponent extends NodeComponent {
@@ -43,7 +41,6 @@ class IfNodeComponent extends NodeComponent {
       this.falseLayout ? this.falseLayout.width : 0,
       nodeWidth
     );
-    // console.log(this.trueLayout, this.falseLayout, nodeWidth);
 
     drawText(
       doc,
@@ -67,9 +64,6 @@ class IfNodeComponent extends NodeComponent {
       this.node.label!
     );
 
-    // console.log("X: ", x + this.nodeWidth / 2 + nodeWidth / 2);
-    // console.log("Y: ", y + nodeHeight / 2);
-    // console.log("X@ ", x, this.nodeWidth, columnWidth, IF_ARROW_PADDING);
     drawLine(
       doc,
       x + this.nodeWidth / 2 + nodeWidth / 2,

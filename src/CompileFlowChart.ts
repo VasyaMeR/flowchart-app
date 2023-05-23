@@ -11,7 +11,7 @@ const compileFlowChart = (root: Node) => {
   doc.setLineWidth(0.5);
 
   let l = generateLayoutFromFlow(root).children!;
-  console.log("root", l);
+
   l.evaluate(doc);
   l.draw(doc, w / 2, 5);
 

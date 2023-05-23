@@ -13,8 +13,7 @@ class StringView {
 
 	removePrefix(prefix: number): void {
 		this._index += prefix;
-		return;
-		if (this._index >= this._string.length) {
+		if (this._index > this._string.length) {
 			throw Error();
 		}
 	}

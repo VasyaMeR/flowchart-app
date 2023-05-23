@@ -6,7 +6,6 @@ import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 import { Button } from "react-bootstrap";
-import { EXAMPLE_FLOW_CHART } from "./parsers/FlowDataTypes"
 import compileFlowChart from "./CompileFlowChart"
 import ParseCppCode from "./parsers/CppCodeParser"
 
